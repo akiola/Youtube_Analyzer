@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Video Analyzer</h1>
+        <p>Extract transcripts and summaries from YouTube videos</p>
+
+        <div class="video-background">
+            <video autoplay muted loop id="background-video">
+                <source src="{{ url_for('static', filename='background.mp4') }}" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="form-container">
+            <form action="{{ url_for('main.process_video') }}" method="post">
+                <div class="input-group">
+                    <input type="text" name="youtube_url" id="youtube_url" placeholder="Paste YouTube URL here" required>
+                    <button type="submit">Analyze</button>
+                </div>
+            </form>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="features">
+            <div class="feature">
+                <h3>Transcribe</h3>
+                <p>Extract accurate transcriptions from YouTube videos</p>
+            </div>
+            <div class="feature">
+                <h3>Summarize</h3>
+                <p>Get concise summaries of video content</p>
+            </div>
+            <div class="feature">
+                <h3>Analyze</h3>
+                <p>Extract key insights and keywords</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YouTube Video Analyzer</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        });
+    </script>
+</body>
+</html>

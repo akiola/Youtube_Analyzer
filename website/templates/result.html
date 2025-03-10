@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - YouTube Video Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis Results</h1>
+        
+        <div class="video-container">
+            <h2>{{ video_title }}</h2>
+            <iframe 
+                width="560" 
+                height="315" 
+                src="https://www.youtube.com/embed/{{ video_id }}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="results-container">
+            <div class="summary-section">
+                <h3>Summary</h3>
+                <div class="content-box">
+                    {{ summary }}
+                </div>
+            </div>
+
+            <div class="transcript-section">
+                <h3>Transcript</h3>
+                <div class="content-box scrollable">
+                    {{ transcript }}
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{{ url_for('main.index') }}" class="btn">Analyze Another Video</a>
+            <button id="copy-transcript" class="btn">Copy Transcript</button>
+            <button id="copy-summary" class="btn">Copy Summary</button>
+            <a href="{{ url_for('main.download_transcript', video_id=video_id) }}" class="btn">Download Transcript</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 YouTube Video Analyzer</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('copy-transcript').addEventListener('click', function() {
+                const transcript = document.querySelector('.transcript-section .content-box').innerText;
+                navigator.clipboard.writeText(transcript).then(function() {
+                    alert('Transcript copied to clipboard!');
+                }, function() {
+                    alert('Failed to copy transcript.');
+                });
+            });
+
+            document.getElementById('copy-summary').addEventListener('click', function() {
+                const summary = document.querySelector('.summary-section .content-box').innerText;
+                navigator.clipboard.writeText(summary).then(function() {
+                    alert('Summary copied to clipboard!');
+                }, function() {
+                    alert('Failed to copy summary.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

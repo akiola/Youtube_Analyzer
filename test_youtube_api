@@ -1,0 +1,142 @@
+import os
+import re
+from pytube import YouTube
+import openai
+from dotenv import load_dotenv
+
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def extract_video_id(url):
+    """Extract the YouTube video ID from a URL."""
+    patterns = [
+        r'(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})',
+        r'youtube\.com\/embed\/([A-Za-z0-9_-]{11})',
+        r'youtube\.com\/v\/([A-Za-z0-9_-]{11})'
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    
+    return None
+
+def download_audio(url):
+    """Download the audio from a YouTube video URL."""
+    try:
+        print(f"Attempting to download audio from URL: {url}")
+        
+        video_id = extract_video_id(url)
+        if not video_id:
+            print("Could not extract video ID from URL")
+            return None, None
+        
+        print(f"Extracted video ID: {video_id}")
+        
+        yt = YouTube(url)
+        print(f"Successfully connected to YouTube video: {yt.title}")
+        
+        audio_stream = yt.streams.filter(only_audio=True).first()
+        if not audio_stream:
+            print("No audio stream found")
+            return None, None
+        
+        print(f"Found audio stream: {audio_stream}")
+        
+        audio_file = audio_stream.download(filename="video_audio")
+        print(f"Downloaded audio to: {audio_file}")
+        
+        mp3_file = "video_audio.mp3"
+        
+        if os.path.exists(mp3_file):
+            os.remove(mp3_file)
+            
+        os.rename(audio_file, mp3_file)
+        print(f"Renamed file to: {mp3_file}")
+        
+        return mp3_file, yt.title
+    except Exception as e:
+        print(f"Error downloading audio: {e}")
+        import traceback
+        traceback.print_exc()
+        return None, None
+
+def transcribe_audio(audio_file):
+    """Transcribe the audio file using OpenAI's Whisper API."""
+    try:
+        print(f"Attempting to transcribe: {audio_file}")
+        
+        if not os.path.exists(audio_file):
+            print(f"Audio file not found: {audio_file}")
+            return None
+        
+        file_size = os.path.getsize(audio_file)
+        print(f"File size: {file_size / (1024 * 1024):.2f} MB")
+        
+        with open(audio_file, "rb") as audio:
+            print("Sending file to OpenAI API...")
+            transcript = openai.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio
+            )
+        
+        print("Transcription successful")
+        print("First 500 characters of transcription:")
+        print(transcript.text[:500])
+        
+        with open("transcription.txt", "w") as f:
+            f.write(transcript.text)
+        
+        print(f"Transcription saved to transcription.txt")
+        return transcript.text
+    except Exception as e:
+        print(f"Error transcribing audio: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+def main():
+    test_url = input("Enter a YouTube URL to test: ")
+    
+    audio_file, video_title = download_audio(test_url)
+    
+    if not audio_file:
+        print("Failed to download audio. Exiting.")
+        return
+    
+    print(f"Successfully downloaded audio from: {video_title}")
+    
+    transcript = transcribe_audio(audio_file)
+    
+    if not transcript:
+        print("Failed to transcribe audio. Exiting.")
+        return
+    
+    print("Process completed successfully!")
+    
+    summarize = input("Would you like to summarize the transcript? (y/n): ")
+    if summarize.lower() == 'y':
+        try:
+            print("Generating summary...")
+            response = openai.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that summarizes video transcripts."},
+                    {"role": "user", "content": f"Please summarize the following transcript concisely:\n\n{transcript}"}
+                ],
+                max_tokens=500
+            )
+            summary = response.choices[0].message.content
+            print("\nSummary:")
+            print(summary)
+            
+            with open("summary.txt", "w") as f:
+                f.write(summary)
+            
+            print("Summary saved to summary.txt")
+        except Exception as e:
+            print(f"Error generating summary: {e}")
+
+if __name__ == "__main__":
+    main()
