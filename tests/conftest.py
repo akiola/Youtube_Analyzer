@@ -1,4 +1,4 @@
-"""Pytest configuration and fixtures."""
+"""Common fixtures for all tests."""
 import os
 import pytest
 from unittest.mock import patch, MagicMock
@@ -8,81 +8,109 @@ from website import create_app
 @pytest.fixture
 def app():
     """Create a Flask app for testing."""
-    app = Flask(__name__)
-    app.config.update({
-        'TESTING': True,
-        'SECRET_KEY': 'test_key',
-        'WTF_CSRF_ENABLED': False,
-    })
-    
-    # Import routes after app creation to avoid circular imports
-    from website.routes import main
-    app.register_blueprint(main)
-    
-    # Create test directories
-    os.makedirs('website/static', exist_ok=True)
-    
-    # Create a test audio file
-    test_audio_path = os.path.join('website/static', "test_audio.mp3")
-    if not os.path.exists(test_audio_path):
-        with open(test_audio_path, "wb") as f:
-            f.write(b"test audio content")
-    
+    app = create_app()
+    app.config['TESTING'] = True
+    app.config['SECRET_KEY'] = 'test_secret_key'  # Add a secret key for testing
+    app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
     yield app
 
 @pytest.fixture
 def client(app):
-    """Create a test client for the app."""
-    return app.test_client()
+    """Create a test client."""
+    with app.test_client() as client:
+        yield client
+
+@pytest.fixture(autouse=True)
+def mock_env_vars():
+    """Set environment variables for testing."""
+    original_openai_key = os.environ.get("OPENAI_API_KEY")
+    os.environ["OPENAI_API_KEY"] = "sk-dummy-api-key-for-testing"
+    yield
+    if original_openai_key:
+        os.environ["OPENAI_API_KEY"] = original_openai_key
+    else:
+        if "OPENAI_API_KEY" in os.environ:
+            del os.environ["OPENAI_API_KEY"]
+
+@pytest.fixture
+def mock_os_path_exists():
+    """Mock os.path.exists function."""
+    with patch('os.path.exists') as mock:
+        yield mock
+
+@pytest.fixture
+def mock_send_file():
+    """Mock send_file function."""
+    with patch('flask.send_file') as mock:
+        yield mock
+
+@pytest.fixture
+def mock_download_audio():
+    """Mock download_audio function."""
+    with patch('website.routes.download_audio') as mock:
+        mock.return_value = ('/fake/path/to/audio.mp3', 'Test Video Title')
+        yield mock
+
+@pytest.fixture
+def mock_transcribe_audio():
+    """Mock transcribe_audio function."""
+    with patch('website.routes.transcribe_audio') as mock:
+        mock.return_value = "This is a test transcript."
+        yield mock
+
+@pytest.fixture
+def mock_summarize_text():
+    """Mock summarize_text function."""
+    with patch('website.routes.summarize_text') as mock:
+        mock.return_value = "This is a test summary."
+        yield mock
+
+@pytest.fixture
+def mock_extract_video_id():
+    """Mock extract_video_id function."""
+    with patch('website.routes.extract_video_id') as mock:
+        mock.return_value = 'test_video_id'
+        yield mock
+
+@pytest.fixture
+def mock_get_video_title():
+    """Mock get_video_title function."""
+    with patch('website.routes.get_video_title') as mock:
+        mock.return_value = 'Test Video Title'
+        yield mock
 
 @pytest.fixture
 def mock_subprocess_run():
-    """Mock subprocess.run for testing yt-dlp commands."""
-    with patch('subprocess.run') as mock_run:
+    """Mock subprocess.run function."""
+    with patch('subprocess.run') as mock:
         mock_process = MagicMock()
-        mock_process.returncode = 0
         mock_process.stdout = "Test Video Title"
-        mock_run.return_value = mock_process
-        yield mock_run
+        mock_process.returncode = 0
+        mock.return_value = mock_process
+        yield mock
+
+@pytest.fixture
+def mock_open_file():
+    """Mock built-in open function."""
+    mock_file = MagicMock()
+    mock_file.__enter__.return_value = mock_file
+    
+    with patch('builtins.open', return_value=mock_file) as mock:
+        yield mock, mock_file
 
 @pytest.fixture
 def mock_openai_transcribe():
     """Mock OpenAI transcription API."""
-    with patch('openai.audio.transcriptions.create') as mock_transcribe:
-        mock_response = MagicMock()
-        mock_response.text = "This is a test transcription."
-        mock_transcribe.return_value = mock_response
-        yield mock_transcribe
+    with patch('openai.audio.transcriptions.create') as mock:
+        mock.return_value = MagicMock(text="This is a mocked transcript")
+        yield mock
 
 @pytest.fixture
 def mock_openai_summarize():
     """Mock OpenAI chat completion API for summarization."""
-    with patch('openai.chat.completions.create') as mock_summarize:
-        mock_choice = MagicMock()
-        mock_choice.message = MagicMock()
-        mock_choice.message.content = "This is a test summary."
-        mock_response = MagicMock()
-        mock_response.choices = [mock_choice]
-        mock_summarize.return_value = mock_response
-        yield mock_summarize
-
-@pytest.fixture
-def mock_os_path_exists():
-    """Mock os.path.exists to always return True."""
-    with patch('os.path.exists', return_value=True) as mock_exists:
-        yield mock_exists
-
-@pytest.fixture
-def mock_os_path_getsize():
-    """Mock os.path.getsize to return a valid file size."""
-    with patch('os.path.getsize', return_value=1024 * 1024) as mock_getsize:
-        yield mock_getsize
-
-@pytest.fixture
-def mock_open_file():
-    """Mock open function for file operations."""
-    mock_file = MagicMock()
-    mock_file.__enter__.return_value = mock_file
+    mock_choice = MagicMock()
+    mock_choice.message.content = "This is a mocked summary"
     
-    with patch('builtins.open', return_value=mock_file) as mock_open:
-        yield mock_open
+    with patch('openai.chat.completions.create') as mock:
+        mock.return_value = MagicMock(choices=[mock_choice])
+        yield mock
