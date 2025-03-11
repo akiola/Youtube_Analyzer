@@ -52,7 +52,7 @@ def download_audio(video_id):
         print(f"Downloading audio from: {url}")
 
         audio_file = os.path.join(STATIC_DIR, f"video_audio_{video_id}.mp3")
-        cookies_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt") 
+        cookies_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt")
 
         command = [
             "yt-dlp",
@@ -64,7 +64,7 @@ def download_audio(video_id):
         ]
 
         print(f"Executing command: {' '.join(command)}")
-        result = subprocess.run(command, capture_output=True, text=True)  
+        result = subprocess.run(command, capture_output=True, text=True)#pylint: disable=subprocess-run-check)
 
         if result.returncode != 0:
             print(f"❌ Error executing yt-dlp: {result.stderr}")
@@ -76,7 +76,7 @@ def download_audio(video_id):
 
         return audio_file, video_title
 
-    except Exception as e:
+    except Exception as e: #pylint: disable=broad-except
         print(f"❌ Error downloading audio: {e}")
         return None, None
 
