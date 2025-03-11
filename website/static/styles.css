@@ -1,13 +1,13 @@
 /* Main styles for YouTube Video Analyzer */
 
 :root {
-    --primary-color: #ff0000;
-    --secondary-color: #282828;
-    --text-color: #ffffff;
-    --bg-color: #121212;
-    --card-bg: #1e1e1e;
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --text-color: #ecf0f1;
+    --bg-color: #1a1a2e;
+    --card-bg: #16213e;
     --border-radius: 8px;
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -16,145 +16,143 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 body {
     font-family: 'Roboto', Arial, sans-serif;
-    background-color: var(--bg-color);
+    background: linear-gradient(135deg, #091c34, #1a223b);
     color: var(--text-color);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
-}
-
-h1, h2, h3 {
-    margin-bottom: 1rem;
     text-align: center;
+    flex: 1;
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     color: var(--primary-color);
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 p {
+    font-size: 1.1rem;
     margin-bottom: 1rem;
-    text-align: center;
+    opacity: 0.8;
 }
 
-/* Video background */
-.video-background {
+/* Background styling */
+body::before {
+    content: "";
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    background: linear-gradient(270deg, #0a192f, #112240, #0a192f);
+    background-size: 400% 400%;
+    animation: gradientAnimation 5s ease infinite;
     z-index: -1;
-    overflow: hidden;
 }
 
-#background-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.15;
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* Form styles */
 .form-container {
-    margin: 2rem 0;
+    margin: 1rem auto;
+    max-width: 600px;
+    padding: 1.5rem;
+    background: rgba(27, 38, 67, 0.9);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 .input-group {
     display: flex;
-    max-width: 800px;
-    margin: 0 auto;
+    gap: 10px;
 }
 
 input[type="text"] {
     flex: 1;
     padding: 1rem;
     border: none;
-    border-radius: var(--border-radius) 0 0 var(--border-radius);
-    font-size: 1rem;
-    background-color: #333;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    background-color: #23395d;
     color: var(--text-color);
+    transition: 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    background-color: #1b2a4a;
 }
 
 button {
     padding: 1rem 2rem;
     border: none;
-    border-radius: 0 var(--border-radius) var(--border-radius) 0;
-    background-color: var(--primary-color);
+    border-radius: var(--border-radius);
+    background: linear-gradient(135deg, #1e4f70, var(--primary-color));
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 1.1rem;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: transform 0.3s, background 0.3s;
 }
 
 button:hover {
-    background-color: #cc0000;
-}
-
-/* Flash messages */
-.flash-messages {
-    margin: 1rem 0;
-}
-
-.flash-message {
-    padding: 1rem;
-    background-color: #333;
-    border-radius: var(--border-radius);
-    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #102434, #133f5c);
+    transform: scale(1.05);
 }
 
 /* Features section */
 .features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    gap: 1rem;
     margin-top: 3rem;
+    max-width: 1200px;
 }
 
 .feature {
-    background-color: var(--card-bg);
+    background: linear-gradient(145deg, #1a1a2e, #131f34);
     padding: 2rem;
     border-radius: var(--border-radius);
     text-align: center;
     box-shadow: var(--box-shadow);
-    transition: transform 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .feature:hover {
     transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
 }
 
 .feature h3 {
     color: var(--primary-color);
+    font-size: 1.5rem;
 }
 
 /* Results page styles */
-.video-container {
-    margin: 2rem 0;
-    text-align: center;
-}
-
-.video-container iframe {
-    max-width: 100%;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-}
-
 .results-container {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2rem;
     margin: 2rem 0;
+    text-align: left;
 }
 
 @media (min-width: 768px) {
@@ -177,33 +175,43 @@ button:hover {
 
 .actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 1rem;
     justify-content: center;
     margin: 2rem 0;
 }
 
 .btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 0.75rem 1.5rem;
     background-color: var(--primary-color);
     color: var(--text-color);
     text-decoration: none;
     border-radius: var(--border-radius);
     transition: background-color 0.3s;
+    font-weight: bold;
+    white-space: nowrap;
 }
 
 .btn:hover {
-    background-color: #cc0000;
+    background-color: #1b6ca8;
 }
 
 /* Footer */
 footer {
     text-align: center;
-    padding: 2rem 0;
-    margin-top: 2rem;
-    color: #999;
+    padding: 1rem 0;
+    color: #aaa;
+    font-size: 0.9rem;
+    background: rgba(22, 33, 62, 0.8);
+    border-top: 1px solid #23395d;
+    width: 100%;
+    margin-top: auto;
 }
+
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
@@ -226,5 +234,22 @@ footer {
     .btn {
         width: 100%;
         text-align: center;
+    }
+}
+@media (max-width: 600px) {
+    .input-group {
+        flex-direction: column;
+    }
+    .actions {
+        flex-wrap: wrap;
+    }
+    .features {
+        grid-template-columns: 1fr;
+    }
+    .results-container {
+        grid-template-columns: 1fr;
+    }
+    footer {
+        font-size: 0.8rem;
     }
 }

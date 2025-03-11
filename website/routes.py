@@ -46,15 +46,17 @@ def get_video_title(video_id):
 
 
 def download_audio(video_id):
-    """Download audio from YouTube using yt-dlp and get title."""
+    """Download audio from YouTube using yt-dlp and get title.""" ##with the cookies now
     try:
         url = f"https://www.youtube.com/watch?v={video_id}"
         print(f"Downloading audio from: {url}")
 
         audio_file = os.path.join(STATIC_DIR, f"video_audio_{video_id}.mp3")
+        cookies_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt") 
 
         command = [
             "yt-dlp",
+            "--cookies", cookies_path, 
             "-x",
             "--audio-format", "mp3",
             "-o", audio_file,
@@ -62,7 +64,7 @@ def download_audio(video_id):
         ]
 
         print(f"Executing command: {' '.join(command)}")
-        result = subprocess.run(command, capture_output=True, text=True) #pylint: disable=subprocess-run-check
+        result = subprocess.run(command, capture_output=True, text=True)  
 
         if result.returncode != 0:
             print(f"❌ Error executing yt-dlp: {result.stderr}")
@@ -74,9 +76,10 @@ def download_audio(video_id):
 
         return audio_file, video_title
 
-    except Exception as e:#pylint: disable=broad-except
+    except Exception as e:
         print(f"❌ Error downloading audio: {e}")
         return None, None
+
 
 
 def transcribe_audio(audio_file):

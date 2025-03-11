@@ -28,6 +28,7 @@
                 <div class="content-box">
                     {{ summary }}
                 </div>
+                <button id="copy-summary" class="btn">📋 Copy Summary</button>
             </div>
 
             <div class="transcript-section">
@@ -39,10 +40,8 @@
         </div>
 
         <div class="actions">
-            <a href="{{ url_for('main.index') }}" class="btn">Analyze Another Video</a>
-            <button id="copy-transcript" class="btn">Copy Transcript</button>
-            <button id="copy-summary" class="btn">Copy Summary</button>
-            <a href="{{ url_for('main.download_transcript', video_id=video_id) }}" class="btn">Download Transcript</a>
+            <a href="{{ url_for('main.index') }}" class="btn primary">🔍 Analyze Another Video</a>
+            <a href="{{ url_for('main.download_transcript', video_id=video_id) }}" class="btn secondary">⬇️ Download Transcript</a>
         </div>
     </div>
 
@@ -52,22 +51,19 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('copy-transcript').addEventListener('click', function() {
-                const transcript = document.querySelector('.transcript-section .content-box').innerText;
-                navigator.clipboard.writeText(transcript).then(function() {
-                    alert('Transcript copied to clipboard!');
-                }, function() {
-                    alert('Failed to copy transcript.');
+            function copyToClipboard(selector, message) {
+                const text = document.querySelector(selector).innerText;
+                navigator.clipboard.writeText(text).then(function() {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.innerText = message;
+                    document.body.appendChild(tooltip);
+                    setTimeout(() => tooltip.remove(), 2000);
                 });
-            });
+            }
 
             document.getElementById('copy-summary').addEventListener('click', function() {
-                const summary = document.querySelector('.summary-section .content-box').innerText;
-                navigator.clipboard.writeText(summary).then(function() {
-                    alert('Summary copied to clipboard!');
-                }, function() {
-                    alert('Failed to copy summary.');
-                });
+                copyToClipboard('.summary-section .content-box', 'Summary copied!');
             });
         });
     </script>
